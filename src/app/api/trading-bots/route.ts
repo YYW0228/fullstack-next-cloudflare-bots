@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { signal, quantity, market, botType } = body;
+    const { signal, quantity, market, botType } = body as { signal: string; quantity: number; market: string; botType?: string };
 
     // 验证输入
     if (!signal || !quantity || !market) {
@@ -130,7 +130,7 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
-    const { botType, config } = body;
+    const { botType, config } = body as { botType: string; config: any };
 
     // 验证配置 (后续存储到 D1 数据库)
     const updatedConfig = {

@@ -240,7 +240,7 @@ export default {
       // 路由处理
       if (url.pathname === '/webhook/telegram' && request.method === 'POST') {
         // Telegram Webhook 处理
-        const telegramData = await request.json();
+        const telegramData = await request.json() as any;
         
         // 解析 Telegram 消息中的交易信号
         const message = telegramData.message?.text || '';
@@ -267,7 +267,7 @@ export default {
       
       if (url.pathname === '/api/process-signal' && request.method === 'POST') {
         // 手动信号处理
-        const signalData = await request.json();
+        const signalData = await request.json() as any;
         const result = await processor.processSignal(signalData);
         
         return new Response(JSON.stringify(result), {

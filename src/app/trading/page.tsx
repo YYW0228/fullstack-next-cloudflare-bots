@@ -56,7 +56,7 @@ const TradingBotsPage = () => {
     try {
       const response = await fetch(`/api/trading-bots?type=${botType}`);
       const result = await response.json();
-      return result.success ? result.data : null;
+      return (result as any)?.success ? (result as any)?.data : null;
     } catch (error) {
       console.error(`获取${botType}状态失败:`, error);
       return null;
@@ -72,7 +72,7 @@ const TradingBotsPage = () => {
         body: JSON.stringify({})
       });
       const result = await response.json();
-      return result.success ? result.data : null;
+      return (result as any)?.success ? (result as any)?.data : null;
     } catch (error) {
       console.error('获取历史分析失败:', error);
       return null;
