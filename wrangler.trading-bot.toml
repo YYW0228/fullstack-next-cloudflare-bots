@@ -1,0 +1,43 @@
+# Cloudflare Workers 反向跟单机器人专用配置
+name = "reverse-trading-bot"
+main = "src/workers/reverse-trading-bot.ts"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# 定时任务 - 每分钟检查机器人状态
+[triggers]
+crons = ["* * * * *"]
+
+# D1 数据库绑定
+[[d1_databases]]
+binding = "TRADING_BOTS_DB"
+database_name = "trading-bots-db"
+database_id = "3c71ce69-4ea4-4b0b-933f-6653091cc29b"
+
+# R2 存储绑定 - 存储交易日志
+[[r2_buckets]]
+binding = "TRADING_LOGS"
+bucket_name = "trading-logs-bucket"
+
+# KV 存储绑定 - 存储机器人状态
+[[kv_namespaces]]
+binding = "BOT_STATUS"
+id = "your-kv-namespace-id"
+
+# 环境变量
+[vars]
+DEFAULT_MARKET = "BTC-USDT-SWAP"
+DEFAULT_QUANTITY = "1"
+REVERSE_TRADING_ENABLED = "true"
+RISK_MANAGEMENT_ENABLED = "true"
+MAX_DAILY_LOSS = "0.05"
+
+# 生产环境配置
+[env.production]
+name = "reverse-trading-bot-prod"
+vars = { OKX_SANDBOX = "false" }
+
+# 测试环境配置  
+[env.staging]
+name = "reverse-trading-bot-staging"
+vars = { OKX_SANDBOX = "true" }
