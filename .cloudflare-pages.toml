@@ -1,0 +1,11 @@
+[build]
+command = "pnpm install && pnpm run build:cf"
+publish = ".open-next"
+
+[env.production]
+NODE_VERSION = "18"
+PNPM_VERSION = "8"
+
+[env.preview]
+NODE_VERSION = "18" 
+PNPM_VERSION = "8"

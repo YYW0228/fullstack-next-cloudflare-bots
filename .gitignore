@@ -44,3 +44,9 @@ next-env.d.ts
 !.dev.vars.example
 .env*
 !.env.example
+.open-next/
+node_modules/
+.env*
+!.env.example
+dist/
+build/
