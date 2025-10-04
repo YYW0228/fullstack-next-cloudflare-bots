@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { historicalData } = body;
+    const { historicalData } = body as { historicalData?: string[] };
 
     // 解析您提供的历史交易数据格式
     const parseHistoricalSignal = (signalText: string) => {
