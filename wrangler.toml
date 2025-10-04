@@ -1,0 +1,9 @@
+name = "reverse-trading-bot"
+compatibility_date = "2023-12-01"
+pages_build_output_dir = ".next"
+
+[env.production.vars]
+NODE_ENV = "production"
+
+[env.preview.vars]  
+NODE_ENV = "production"

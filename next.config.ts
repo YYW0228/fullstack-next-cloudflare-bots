@@ -1,16 +1,19 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
-    /* config options here */
-};
-
-// Only run during `next dev`, not during `next build`
-if (process.argv.includes("dev")) {
-    import("@opennextjs/cloudflare").then(
-        ({ initOpenNextCloudflareForDev }) => {
-            initOpenNextCloudflareForDev();
-        },
-    );
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  experimental: {
+    appDir: true,
+  },
+  typescript: {
+    ignoreBuildErrors: false,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  // 禁用构建缓存以避免大文件
+  webpack: (config, { isServer }) => {
+    config.cache = false;
+    return config;
+  },
 }
 
-export default nextConfig;
+module.exports = nextConfig

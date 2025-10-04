@@ -9,7 +9,7 @@
     "wrangler:dev": "npx wrangler dev",
     "dev:cf": "npx @opennextjs/cloudflare build && wrangler dev",
     "dev:remote": "npx @opennextjs/cloudflare build && wrangler dev --remote",
-    "build:cf": "npx @opennextjs/cloudflare build",
+    "build:cf": "./build-for-cloudflare.sh",
     "deploy:cf": "npx @opennextjs/cloudflare deploy",
     "preview:cf": "npx @opennextjs/cloudflare preview",
     "deploy": "npx @opennextjs/cloudflare deploy",
