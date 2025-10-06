@@ -16,7 +16,9 @@ build/
 
 # Environment variables
 .env*
+.dev.vars
 !.env.example
+!.dev.vars.example
 
 # Logs
 *.log
