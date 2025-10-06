@@ -1,0 +1,53 @@
+Metadata-Version: 2.4
+Name: reverse-trading-core
+Version: 1.0.0
+Summary: 反向跟单机器人核心库 - 智慧交易的基础架构
+Home-page: https://github.com/rovodev/reverse-trading-core
+Author: RovoDev Team
+Author-email: dev@rovodev.com
+Project-URL: Documentation, https://docs.rovodev.com/reverse-trading
+Project-URL: Source, https://github.com/rovodev/reverse-trading-core
+Project-URL: Tracker, https://github.com/rovodev/reverse-trading-core/issues
+Keywords: trading,cryptocurrency,reverse-trading,quantitative,bot,finance
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Financial and Insurance Industry
+Classifier: Topic :: Office/Business :: Financial :: Investment
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Operating System :: OS Independent
+Classifier: Framework :: AsyncIO
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Requires-Dist: ccxt>=4.1.87
+Requires-Dist: telethon>=1.32.1
+Requires-Dist: nest-asyncio>=1.5.8
+Requires-Dist: pytz>=2023.3
+Requires-Dist: typing-extensions>=4.0.0
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0.0; extra == "dev"
+Requires-Dist: pytest-asyncio>=0.21.0; extra == "dev"
+Requires-Dist: pytest-cov>=4.0.0; extra == "dev"
+Requires-Dist: black>=22.0.0; extra == "dev"
+Requires-Dist: flake8>=5.0.0; extra == "dev"
+Requires-Dist: mypy>=1.0.0; extra == "dev"
+Provides-Extra: monitoring
+Requires-Dist: prometheus-client>=0.15.0; extra == "monitoring"
+Requires-Dist: grafana-api>=1.0.0; extra == "monitoring"
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: home-page
+Dynamic: keywords
+Dynamic: project-url
+Dynamic: provides-extra
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
+
+反向跟单机器人核心库

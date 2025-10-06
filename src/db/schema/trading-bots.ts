@@ -1,97 +1,94 @@
-import { sqliteTable, text, integer, real } from 'drizzle-orm/sqlite-core';
-import { createId } from '@paralleldrive/cuid2';
+import { sqliteTable, text, integer, real } from "drizzle-orm/sqlite-core";
+import { createId } from "@paralleldrive/cuid2";
 
-// 交易机器人配置表
-export const tradingBots = sqliteTable('trading_bots', {
-  id: text('id').primaryKey().$defaultFn(() => createId()),
-  name: text('name').notNull(),
-  type: text('type').notNull(), // 'simple-reverse' | 'turtle-reverse'
-  status: text('status').notNull().default('stopped'), // 'running' | 'stopped' | 'error' | 'paused'
-  config: text('config'), // JSON string of bot configuration
-  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
-  userId: text('user_id').notNull(),
+/**
+ * Strategy Instances Table
+ *
+ * This table stores the configuration for each active strategy instance.
+ * A user can have multiple strategy instances for different market pairs.
+ * For example, one user can run both a 'simple-reverse' and a 'turtle-reverse'
+ * strategy on the 'BTC-USDT-SWAP' market simultaneously.
+ */
+export const strategyInstances = sqliteTable("strategy_instances", {
+    id: text("id").primaryKey().$defaultFn(() => createId()),
+    userId: text("user_id").notNull(),
+    name: text("name").notNull(), // e.g., "My Simple BTC Bot"
+    marketPair: text("market_pair").notNull(), // e.g., "BTC-USDT-SWAP"
+    strategyType: text("strategy_type").notNull(), // 'simple-reverse' | 'turtle-reverse'
+    status: text("status").notNull().default("stopped"), // 'running' | 'stopped' | 'paused' | 'error'
+    
+    // JSON string containing strategy-specific parameters.
+    // This design allows for maximum flexibility.
+    config: text("config", { mode: "json" }).notNull(),
+    
+    createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
+    updatedAt: integer("updated_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
 });
 
-// 交易信号表
-export const tradingSignals = sqliteTable('trading_signals', {
-  id: text('id').primaryKey().$defaultFn(() => createId()),
-  originalSignal: text('original_signal').notNull(), // '开多', '开空', '平多', '平空'
-  reversedSignal: text('reversed_signal').notNull(), // 反向信号
-  quantity: integer('quantity').notNull(),
-  market: text('market').notNull(), // 'BTC-USDT-SWAP'
-  confidence: real('confidence').default(1.0),
-  timestamp: integer('timestamp', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
-  source: text('source').default('telegram'), // 信号来源
-  groupId: text('group_id'), // Telegram 群组ID
-  botId: text('bot_id').references(() => tradingBots.id),
+/**
+ * Simple Positions Table
+ *
+ * Persists the state for each individual position created by the 'simple-reverse' strategy.
+ * This is crucial for the stateless Cloudflare Worker environment.
+ */
+export const simplePositions = sqliteTable("simple_positions", {
+    id: text("id").primaryKey().$defaultFn(() => createId()),
+    strategyInstanceId: text("strategy_instance_id").references(() => strategyInstances.id, { onDelete: "cascade" }),
+    
+    // Position details
+    side: text("side").notNull(), // Our side: '开多' or '开空'
+    size: real("size").notNull(),
+    entryPrice: real("entry_price").notNull(),
+    
+    // State tracking
+    status: text("status").notNull().default("active"), // 'active' | 'closing' | 'closed'
+    orderId: text("order_id").notNull(),
+    openedAt: integer("opened_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
+    closedAt: integer("closed_at", { mode: "timestamp" }),
+    
+    // PnL and reason for closing
+    pnl: real("pnl"),
+    closeReason: text("close_reason"), // 'profit_target' | 'stop_loss' | 'timeout' | 'emergency'
 });
 
-// 交易执行表
-export const tradeExecutions = sqliteTable('trade_executions', {
-  id: text('id').primaryKey().$defaultFn(() => createId()),
-  signalId: text('signal_id').references(() => tradingSignals.id),
-  botId: text('bot_id').references(() => tradingBots.id),
-  action: text('action').notNull(), // 'OPEN_LONG', 'OPEN_SHORT', 'CLOSE_LONG', 'CLOSE_SHORT'
-  quantity: real('quantity').notNull(),
-  price: real('price'),
-  market: text('market').notNull(),
-  orderId: text('order_id'), // 交易所返回的订单ID
-  status: text('status').notNull().default('pending'), // 'pending', 'filled', 'cancelled', 'failed'
-  executedAt: integer('executed_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
-  response: text('response'), // JSON string of exchange response
-  pnl: real('pnl').default(0), // 盈亏
-  fees: real('fees').default(0), // 手续费
+/**
+ * Turtle Sequences Table
+ *
+ * Persists the state for each trading sequence managed by the 'turtle-reverse' strategy.
+ * A sequence is a series of related trades starting from signal quantity 1.
+ */
+export const turtleSequences = sqliteTable("turtle_sequences", {
+    id: text("id").primaryKey().$defaultFn(() => createId()),
+    strategyInstanceId: text("strategy_instance_id").references(() => strategyInstances.id, { onDelete: "cascade" }),
+    
+    // Sequence details
+    direction: text("direction").notNull(), // Our direction: 'long' or 'short'
+    status: text("status").notNull().default("active"), // 'active' | 'closing' | 'closed'
+    
+    // State tracking
+    currentMaxQuantity: integer("current_max_quantity").notNull().default(0),
+    startedAt: integer("started_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
+    closedAt: integer("closed_at", { mode: "timestamp" }),
 });
 
-// 机器人性能表
-export const botPerformance = sqliteTable('bot_performance', {
-  id: text('id').primaryKey().$defaultFn(() => createId()),
-  botId: text('bot_id').references(() => tradingBots.id),
-  date: text('date').notNull(), // YYYY-MM-DD format
-  totalTrades: integer('total_trades').default(0),
-  successfulTrades: integer('successful_trades').default(0),
-  winRate: real('win_rate').default(0),
-  totalPnL: real('total_pnl').default(0),
-  dailyPnL: real('daily_pnl').default(0),
-  maxDrawdown: real('max_drawdown').default(0),
-  volume: real('volume').default(0),
-  activePositions: integer('active_positions').default(0),
-  createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
-});
-
-// 风险管理记录表
-export const riskManagement = sqliteTable('risk_management', {
-  id: text('id').primaryKey().$defaultFn(() => createId()),
-  botId: text('bot_id').references(() => tradingBots.id),
-  riskType: text('risk_type').notNull(), // 'daily_loss', 'max_drawdown', 'position_size'
-  threshold: real('threshold').notNull(),
-  currentValue: real('current_value').notNull(),
-  action: text('action').notNull(), // 'warning', 'stop_trading', 'reduce_position'
-  triggeredAt: integer('triggered_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
-  resolved: integer('resolved', { mode: 'boolean' }).default(false),
-});
-
-// 历史数据导入表（用于您的10个月数据）
-export const historicalData = sqliteTable('historical_data', {
-  id: text('id').primaryKey().$defaultFn(() => createId()),
-  originalSignal: text('original_signal').notNull(),
-  quantity: integer('quantity').notNull(),
-  market: text('market').notNull(),
-  timestamp: integer('timestamp').notNull(),
-  orderId: text('order_id'),
-  response: text('response'), // 原始JSON响应
-  success: integer('success', { mode: 'boolean' }).default(true),
-  importedAt: integer('imported_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
-});
-
-// 系统配置表
-export const systemConfig = sqliteTable('system_config', {
-  id: text('id').primaryKey().$defaultFn(() => createId()),
-  key: text('key').notNull().unique(),
-  value: text('value').notNull(),
-  description: text('description'),
-  category: text('category').default('general'),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
-  updatedBy: text('updated_by'),
+/**
+ * Turtle Positions Table
+ *
+ * Persists the state for each individual position within a turtle sequence.
+ * This table has a many-to-one relationship with turtleSequences.
+ */
+export const turtlePositions = sqliteTable("turtle_positions", {
+    id: text("id").primaryKey().$defaultFn(() => createId()),
+    sequenceId: text("sequence_id").references(() => turtleSequences.id, { onDelete: "cascade" }),
+    
+    // Position details
+    side: text("side").notNull(), // '开多' or '开空'
+    size: real("size").notNull(),
+    entryPrice: real("entry_price").notNull(),
+    signalQuantity: integer("signal_quantity").notNull(), // The signal number (1, 2, 3...) that triggered this position
+    
+    // State tracking
+    status: text("status").notNull().default("active"), // 'active' | 'partially_closed' | 'closed'
+    orderId: text("order_id").notNull(),
+    openedAt: integer("opened_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
 });

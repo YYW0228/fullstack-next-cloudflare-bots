@@ -1,0 +1,17 @@
+ccxt>=4.1.87
+telethon>=1.32.1
+nest-asyncio>=1.5.8
+pytz>=2023.3
+typing-extensions>=4.0.0
+
+[dev]
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
+pytest-cov>=4.0.0
+black>=22.0.0
+flake8>=5.0.0
+mypy>=1.0.0
+
+[monitoring]
+prometheus-client>=0.15.0
+grafana-api>=1.0.0

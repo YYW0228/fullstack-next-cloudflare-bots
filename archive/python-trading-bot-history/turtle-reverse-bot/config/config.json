@@ -1,0 +1,137 @@
+{
+  "description": "海龟反向机器人配置 - 滚仓分层止盈策略",
+  "bot_type": "turtle_reverse",
+  "version": "1.0.0",
+  
+  "telegram": {
+    "api_id": "YOUR_TELEGRAM_API_ID",
+    "api_hash": "YOUR_TELEGRAM_API_HASH",
+    "phone_number": "YOUR_PHONE_NUMBER", 
+    "group_ids": [-1001911467666],
+    "channel_id": -1002356209964,
+    "session_name": "turtle_reverse_bot"
+  },
+  
+  "exchange": {
+    "name": "okx",
+    "api_key": "YOUR_OKX_API_KEY",
+    "secret": "YOUR_OKX_SECRET", 
+    "password": "YOUR_OKX_PASSWORD",
+    "sandbox_mode": true,
+    "enable_rate_limit": true,
+    "default_type": "swap",
+    "timeout": 30,
+    "max_retries": 3
+  },
+  
+  "trading": {
+    "symbol": "BTC-USDT-SWAP",
+    "market_order_only": true,
+    "fast_execution": true,
+    "max_slippage": 0.002,
+    "min_order_amount": 0.01
+  },
+  
+  "strategy": {
+    "name": "TurtleReverse",
+    "description": "海龟滚仓分层止盈反向跟单策略",
+    
+    "position_sizes": {
+      "1": 10,
+      "2": 20, 
+      "3": 30,
+      "4": 40,
+      "5": 50,
+      "6": 60,
+      "7": 70,
+      "8": 80
+    },
+    
+    "profit_thresholds": {
+      "1": 0.0,
+      "2": 0.0,
+      "3": 0.50,
+      "4": 0.30,
+      "5": 0.30,
+      "6": 0.30,
+      "7": 0.30,
+      "8": 0.30
+    },
+    
+    "close_ratios": {
+      "1": 0.0,
+      "2": 0.0, 
+      "3": 0.50,
+      "4": 0.80,
+      "5": 0.90,
+      "6": 0.90,
+      "7": 0.90,
+      "8": 1.00
+    },
+    
+    "sequence_timeout_hours": 8,
+    "emergency_stop_loss": -0.20,
+    "max_concurrent_sequences": 3,
+    "min_signal_confidence": 0.6,
+    "sequence_cooldown_minutes": 30,
+    "max_sequence_duration_hours": 12
+  },
+  
+  "risk": {
+    "max_daily_loss": 0.08,
+    "max_position_size": 1000.0,
+    "max_drawdown": 0.25,
+    "max_sequence_size": 800.0,
+    "emergency_stop_loss": 0.20,
+    "max_daily_trades": 100,
+    "account_risk_percentage": 0.03,
+    "sequence_risk_limit": 0.15
+  },
+  
+  "monitoring": {
+    "check_interval": 2,
+    "price_update_interval": 2,
+    "sequence_check_interval": 10,
+    "status_report_interval": 180,
+    "performance_window_hours": 24,
+    "alert_thresholds": {
+      "high_loss": 0.08,
+      "sequence_timeout": 28800,
+      "api_error_rate": 0.1,
+      "high_risk_sequences": 2,
+      "emergency_drawdown": 0.18
+    }
+  },
+  
+  "advanced": {
+    "dynamic_position_sizing": true,
+    "confidence_based_sizing": true,
+    "volatility_adjustment": true,
+    "trend_confirmation": false,
+    "partial_profit_optimization": true,
+    "smart_sequence_management": true
+  },
+  
+  "logging": {
+    "level": "INFO",
+    "console_output": true,
+    "file_output": true,
+    "max_file_size": "20MB",
+    "backup_count": 10,
+    "structured_logging": true,
+    "sequence_logging": true,
+    "trade_logging": true
+  },
+  
+  "system": {
+    "timezone": "UTC",
+    "locale": "zh_CN", 
+    "max_memory_usage": "1GB",
+    "graceful_shutdown_timeout": 60,
+    "emergency_shutdown_conditions": {
+      "max_loss_percentage": 0.25,
+      "consecutive_failed_orders": 10,
+      "api_error_threshold": 0.20
+    }
+  }
+}

@@ -1,0 +1,27 @@
+# 反向跟单机器人核心库依赖
+
+# 交易所接口
+ccxt>=4.1.87
+
+# Telegram客户端
+telethon>=1.32.1
+
+# 异步支持
+nest-asyncio>=1.5.8
+
+# 时区处理
+pytz>=2023.3
+
+# 数据处理
+typing-extensions>=4.0.0
+
+# 开发依赖（可选）
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
+pytest-cov>=4.0.0
+black>=22.0.0
+flake8>=5.0.0
+mypy>=1.0.0
+
+# 监控依赖（可选）
+prometheus-client>=0.15.0

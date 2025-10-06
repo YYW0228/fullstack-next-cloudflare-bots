@@ -1,155 +1,86 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { BotType, BotStatus, TradeType } from '@/modules/trading-bots/models/bot.enum';
+import { NextResponse } from "next/server";
+import { headers } from "next/headers";
+import { eq, desc } from "drizzle-orm";
+import { z } from "zod";
 
-// 反向跟单核心逻辑
-const reverseSignal = (originalSignal: string): TradeType => {
-  switch (originalSignal) {
-    case '开多':
-      return TradeType.OPEN_SHORT;  // 信号开多 → 我们开空
-    case '开空':
-      return TradeType.OPEN_LONG;   // 信号开空 → 我们开多
-    case '平多':
-      return TradeType.CLOSE_SHORT; // 信号平多 → 我们平空
-    case '平空':
-      return TradeType.CLOSE_LONG;  // 信号平空 → 我们平多
-    default:
-      throw new Error(`未知信号类型: ${originalSignal}`);
-  }
-};
+import { getDb } from "@/db";
+import { strategyInstances } from "@/db/schema/trading-bots";
+import handleApiError from "@/lib/api-error";
+import { getAuthInstance } from "@/modules/auth/utils/auth-utils";
 
-// GET: 获取机器人状态
-export async function GET(request: NextRequest) {
-  try {
-    const searchParams = request.nextUrl.searchParams;
-    const botType = searchParams.get('type') as BotType;
+/**
+ * GET /api/trading-bots
+ * Retrieves all strategy instances for the authenticated user.
+ */
+export async function GET(request: Request) {
+    try {
+        // 1. Authenticate the user
+        const auth = await getAuthInstance();
+        const session = await auth.api.getSession({ headers: await headers() });
+        if (!session?.user) {
+            return NextResponse.json({ success: false, error: "Authentication required" }, { status: 401 });
+        }
 
-    // 模拟机器人状态数据 (后续从 D1 数据库获取)
-    const botStatus = {
-      type: botType || BotType.SIMPLE_REVERSE,
-      status: BotStatus.RUNNING,
-      performance: {
-        totalTrades: 156,
-        winRate: 0.73,
-        totalPnL: 2856.42,
-        dailyPnL: 89.23,
-        maxDrawdown: -0.08
-      },
-      positions: {
-        active: 2,
-        maxConcurrent: 5,
-        totalVolume: 18.5
-      },
-      lastSignal: {
-        timestamp: new Date().toISOString(),
-        original: '开多',
-        reversed: '开空',
-        quantity: 1,
-        market: 'BTC-USDT-SWAP'
-      }
-    };
+        // 2. Fetch all instances for the user, ordered by creation date
+        const db = await getDb();
+        const instances = await db
+            .select()
+            .from(strategyInstances)
+            .where(eq(strategyInstances.userId, session.user.id))
+            .orderBy(desc(strategyInstances.createdAt));
 
-    return NextResponse.json({
-      success: true,
-      data: botStatus
-    });
+        return NextResponse.json({ success: true, data: instances });
 
-  } catch (error) {
-    console.error('获取机器人状态失败:', error);
-    return NextResponse.json(
-      { success: false, error: '服务器错误' },
-      { status: 500 }
-    );
-  }
-}
-
-// POST: 处理交易信号
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const { signal, quantity, market, botType } = body as { signal: string; quantity: number; market: string; botType?: string };
-
-    // 验证输入
-    if (!signal || !quantity || !market) {
-      return NextResponse.json(
-        { success: false, error: '缺少必需参数' },
-        { status: 400 }
-      );
+    } catch (error) {
+        return handleApiError(error);
     }
-
-    // 反向信号转换
-    const reversedAction = reverseSignal(signal);
-    
-    // 构造交易请求 (这里模拟，实际会调用 OKX API)
-    const tradeRequest = {
-      action: reversedAction,
-      quantity: quantity,
-      market: market,
-      timestamp: Date.now(),
-      originalSignal: signal,
-      botType: botType || BotType.SIMPLE_REVERSE
-    };
-
-    // 模拟 OKX API 响应
-    const mockResponse = {
-      code: '0',
-      data: [{
-        clOrdId: '',
-        ordId: String(Date.now() + Math.floor(Math.random() * 1000)),
-        sCode: '0',
-        sMsg: 'Order placed',
-        tag: '',
-        ts: String(Date.now())
-      }],
-      inTime: String(Date.now()),
-      msg: '',
-      outTime: String(Date.now() + 1)
-    };
-
-    // 记录交易日志 (后续存储到 D1 数据库)
-    console.log(`[反向交易] 原始信号: ${signal} → 执行: ${reversedAction} | 数量: ${quantity} | 市场: ${market}`);
-
-    return NextResponse.json({
-      success: true,
-      data: {
-        tradeRequest,
-        response: mockResponse,
-        message: `反向交易执行成功: ${signal} → ${reversedAction}`
-      }
-    });
-
-  } catch (error) {
-    console.error('交易信号处理失败:', error);
-    return NextResponse.json(
-      { success: false, error: '交易执行失败' },
-      { status: 500 }
-    );
-  }
 }
 
-// PUT: 更新机器人配置
-export async function PUT(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const { botType, config } = body as { botType: string; config: any };
+/**
+ * Zod schema for creating a new strategy instance.
+ */
+const createInstanceSchema = z.object({
+    name: z.string().min(3, "Name must be at least 3 characters long"),
+    marketPair: z.string().min(1, "Market pair is required"),
+    strategyType: z.enum(["simple-reverse", "turtle-reverse"]),
+    // Config is a JSON object, so we accept a record.
+    config: z.record(z.string(), z.any()).refine((data) => Object.keys(data).length > 0, {
+        message: "Config cannot be empty",
+    }),
+});
 
-    // 验证配置 (后续存储到 D1 数据库)
-    const updatedConfig = {
-      botType,
-      ...config,
-      updatedAt: new Date().toISOString()
-    };
+/**
+ * POST /api/trading-bots
+ * Creates a new strategy instance for the authenticated user.
+ */
+export async function POST(request: Request) {
+    try {
+        // 1. Authenticate the user
+        const auth = await getAuthInstance();
+        const session = await auth.api.getSession({ headers: await headers() });
+        if (!session?.user) {
+            return NextResponse.json({ success: false, error: "Authentication required" }, { status: 401 });
+        }
 
-    return NextResponse.json({
-      success: true,
-      data: updatedConfig,
-      message: '机器人配置更新成功'
-    });
+        // 2. Validate the request body
+        const body = await request.json();
+        const validatedData = createInstanceSchema.parse(body);
 
-  } catch (error) {
-    console.error('更新机器人配置失败:', error);
-    return NextResponse.json(
-      { success: false, error: '配置更新失败' },
-      { status: 500 }
-    );
-  }
+        // 3. Insert the new instance into the database
+        const db = await getDb();
+        const [newInstance] = await db
+            .insert(strategyInstances)
+            .values({
+                ...validatedData,
+                userId: session.user.id,
+                status: "stopped", // Always start in a stopped state
+            })
+            .returning();
+
+        // 4. Return the newly created instance
+        return NextResponse.json({ success: true, data: newInstance }, { status: 201 });
+
+    } catch (error) {
+        return handleApiError(error);
+    }
 }

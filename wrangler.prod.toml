@@ -1,0 +1,27 @@
+# This is the configuration file for deploying the core trading bot worker to production.
+
+name = "reverse-trading-bot-prod"
+main = "src/workers/reverse-trading-bot.ts"
+compatibility_date = "2024-03-18"
+
+# Enable Node.js compatibility layer
+compatibility_flags = ["nodejs_compat"]
+
+# Cron trigger for periodic checks (e.g., every minute)
+[triggers]
+crons = ["* * * * *"]
+
+# --- Production Bindings ---
+
+# D1 Database for trading state
+[[d1_databases]]
+binding = "TRADING_BOTS_DB"
+database_name = "production-trading-db" # Replace with your actual production D1 DB name
+database_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" # Replace with your actual production D1 DB ID
+
+# --- Production Secrets ---
+# These secrets must be set in the Cloudflare dashboard or via `wrangler secret put`
+# Example: wrangler secret put OKX_API_KEY
+
+# [vars]
+# OKX_SANDBOX = "false" # Set this to "false" for live trading

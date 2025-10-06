@@ -1,0 +1,37 @@
+{
+  "telegram": {
+    "api_id": "",
+    "api_hash": "",
+    "phone": "",
+    "channels": [
+      "@trading_signals_channel1",
+      "@trading_signals_channel2"
+    ]
+  },
+  "exchanges": {
+    "binance": {
+      "api_key": "",
+      "secret": "",
+      "testnet": true,
+      "base_url": "https://testnet.binance.vision"
+    }
+  },
+  "trading": {
+    "reverse_mode": true,
+    "risk_per_trade": 0.02,
+    "max_positions": 5,
+    "default_leverage": 1,
+    "auto_trading": false,
+    "signal_confidence_threshold": 0.6
+  },
+  "logging": {
+    "level": "INFO",
+    "file": "trading_bot.log",
+    "max_size_mb": 100,
+    "backup_count": 5
+  },
+  "database": {
+    "type": "sqlite",
+    "path": "trading_bot.db"
+  }
+}
