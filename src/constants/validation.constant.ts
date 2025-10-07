@@ -1,9 +1,10 @@
 export const VALIDATION_LIMITS = {
-    TODO: {
-        TITLE_MIN: 3,
-        TITLE_MAX: 255,
-        DESCRIPTION_MAX: 1000,
-        IMAGE_ALT_MAX: 255,
+    TRADING_BOT: {
+        NAME_MIN: 3,
+        NAME_MAX: 50,
+        DESCRIPTION_MAX: 500,
+        POSITION_SIZE_MIN: 1,
+        POSITION_SIZE_MAX: 10000,
     },
     UPLOAD: {
         MAX_FILE_SIZE: 5 * 1024 * 1024, // 5MB
@@ -20,9 +21,10 @@ export const VALIDATION_MESSAGES = {
     INVALID_FILE_TYPE: "Only JPEG and PNG files are allowed",
 } as const;
 
-export const TODO_VALIDATION_MESSAGES = {
-    TITLE_REQUIRED: "Title is required",
-    TITLE_TOO_LONG: "Title must be less than 255 characters",
-    DESCRIPTION_TOO_LONG: "Description must be less than 1000 characters",
-    INVALID_IMAGE_URL: "Invalid image URL",
+export const TRADING_BOT_VALIDATION_MESSAGES = {
+    NAME_REQUIRED: "Bot name is required",
+    NAME_TOO_LONG: "Bot name must be less than 50 characters",
+    DESCRIPTION_TOO_LONG: "Description must be less than 500 characters",
+    INVALID_POSITION_SIZE: "Position size must be between 1 and 10000",
+    STRATEGY_TYPE_REQUIRED: "Strategy type is required",
 } as const;

@@ -6,22 +6,22 @@ interface OKXEnv {
     OKX_API_KEY: string;
     OKX_SECRET: string;
     OKX_PASSPHRASE: string;
-    OKX_SANDBOX: string; // "true" or "false"
+    // 注意：仅支持模拟盘交易，保证测试安全
 }
 
 export class OKXClient {
     private readonly apiKey: string;
     private readonly secret: string;
     private readonly passphrase: string;
-    private readonly isSandbox: boolean;
+    private readonly isSandbox: boolean = true; // 强制使用模拟盘，确保安全
     private readonly baseUrl: string;
 
     constructor(env: OKXEnv) {
         this.apiKey = env.OKX_API_KEY;
         this.secret = env.OKX_SECRET;
         this.passphrase = env.OKX_PASSPHRASE;
-        this.isSandbox = env.OKX_SANDBOX === 'true';
-        this.baseUrl = this.isSandbox ? 'https://www.okx.com' : 'https://www.okx.com'; // Use demo trading endpoint for sandbox
+        // 强制使用模拟盘模式，确保跟单测试安全
+        this.baseUrl = 'https://www.okx.com';
     }
 
     private sign(timestamp: string, method: string, requestPath: string, body: string = ''): string {
@@ -44,9 +44,8 @@ export class OKXClient {
             'OK-ACCESS-PASSPHRASE': this.passphrase,
         };
 
-        if (this.isSandbox) {
-            headers['x-simulated-trading'] = '1';
-        }
+        // 强制启用模拟交易头，所有订单都在模拟环境执行
+        headers['x-simulated-trading'] = '1';
 
         const response = await fetch(`${this.baseUrl}${path}`, {
             method,

@@ -2,6 +2,12 @@ name = "reverse-trading-bot"
 compatibility_date = "2023-12-01"
 pages_build_output_dir = ".next"
 
+[[d1_databases]]
+binding = "DB"
+database_name = "trading-bots-db"
+database_id = "3c71ce69-4ea4-4b0b-933f-6653091cc29b"
+migrations_dir = "src/drizzle"
+
 [env.production.vars]
 NODE_ENV = "production"
 

@@ -22,7 +22,7 @@ bucket_name = "trading-logs-bucket"
 # KV 存储绑定 - 存储机器人状态
 [[kv_namespaces]]
 binding = "BOT_STATUS"
-id = "your-kv-namespace-id"
+id = "placeholder-kv-namespace" # 需要创建KV namespace后替换
 
 # 环境变量
 [vars]
@@ -40,4 +40,25 @@ vars = { OKX_SANDBOX = "false" }
 # 测试环境配置  
 [env.staging]
 name = "reverse-trading-bot-staging"
-vars = { OKX_SANDBOX = "true" }
+
+# 继承所有必要的变量到 staging 环境
+[env.staging.vars]
+DEFAULT_MARKET = "BTC-USDT"
+DEFAULT_QUANTITY = "0.001"
+REVERSE_TRADING_ENABLED = "true"
+RISK_MANAGEMENT_ENABLED = "true"
+MAX_DAILY_LOSS = "1000"
+OKX_SANDBOX = "true"
+
+# 继承资源绑定
+kv_namespaces = [
+  { binding = "TRADING_CONFIG", id = "placeholder-kv-namespace", preview_id = "placeholder-kv-namespace" }
+]
+
+r2_buckets = [
+  { binding = "TRADING_LOGS", bucket_name = "trading-logs-bucket", preview_bucket_name = "trading-logs-bucket" }
+]
+
+d1_databases = [
+  { binding = "DB", database_name = "trading-bots-db", database_id = "3c71ce69-4ea4-4b0b-933f-6653091cc29b" }
+]

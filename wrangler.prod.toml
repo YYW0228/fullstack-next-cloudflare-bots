@@ -16,8 +16,8 @@ crons = ["* * * * *"]
 # D1 Database for trading state
 [[d1_databases]]
 binding = "TRADING_BOTS_DB"
-database_name = "production-trading-db" # Replace with your actual production D1 DB name
-database_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" # Replace with your actual production D1 DB ID
+database_name = "trading-bots-db" # 使用实际的数据库名
+database_id = "3c71ce69-4ea4-4b0b-933f-6653091cc29b" # 使用实际的trading-bots-db ID
 
 # --- Production Secrets ---
 # These secrets must be set in the Cloudflare dashboard or via `wrangler secret put`
